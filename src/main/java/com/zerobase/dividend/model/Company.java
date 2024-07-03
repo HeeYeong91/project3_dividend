@@ -1,14 +1,14 @@
 package com.zerobase.dividend.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 /**
  * 회사 모델
  * @author 이희영
  */
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Company {
 
     private String ticker;
