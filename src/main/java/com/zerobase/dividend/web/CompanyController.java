@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * 회사 컨트롤러
  * @author 이희영
@@ -34,7 +32,8 @@ public class CompanyController {
             @RequestParam
             String keyword
     ) {
-        return null;
+        var result = this.companyService.autocomplete(keyword);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -67,6 +66,7 @@ public class CompanyController {
         }
 
         Company company = this.companyService.save(ticker);
+        this.companyService.addAutocompleteKeyword(company.getName());
 
         return ResponseEntity.ok(company);
     }
