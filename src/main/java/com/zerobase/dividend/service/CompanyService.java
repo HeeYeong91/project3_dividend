@@ -1,5 +1,8 @@
 package com.zerobase.dividend.service;
 
+import com.zerobase.dividend.exception.impl.AlreadyExistTickerException;
+import com.zerobase.dividend.exception.impl.IncorrectTickerException;
+import com.zerobase.dividend.exception.impl.NoCompanyException;
 import com.zerobase.dividend.model.Company;
 import com.zerobase.dividend.model.ScrapedResult;
 import com.zerobase.dividend.persist.CompanyRepository;
@@ -40,7 +43,7 @@ public class CompanyService {
     public Company save(String ticker) {
         boolean exists = this.companyRepository.existsByTicker(ticker);
         if (exists) {
-            throw new RuntimeException("already exists ticker -> " + ticker);
+            throw new AlreadyExistTickerException();
         }
 
         return this.storeCompanyAndDividend(ticker);
@@ -65,7 +68,7 @@ public class CompanyService {
         // ticker 를 기준으로 회사를 스크랩핑
         Company company = this.yahooFinanceScraper.scrapCompanyByTicker(ticker);
         if (ObjectUtils.isEmpty(company)) {
-            throw new RuntimeException("failed to scrap ticker -> " + ticker);
+            throw new IncorrectTickerException();
         }
 
         // 해당 회사가 존재할 경우, 회사의 배당금 정보 스크래핑
@@ -109,5 +112,22 @@ public class CompanyService {
      */
     public void deleteAutocompleteKeyword(String keyword) {
         this.trie.remove(keyword);
+    }
+
+    /**
+     * 회사 삭제
+     *
+     * @param ticker 티커
+     * @return 회사이름
+     */
+    public String deleteCompany(String ticker) {
+        var company = this.companyRepository.findByTicker(ticker)
+                .orElseThrow(() -> new NoCompanyException());
+
+        this.dividendRepository.deleteAllByCompanyId(company.getId());
+        this.companyRepository.delete(company);
+        this.deleteAutocompleteKeyword(company.getName());
+
+        return company.getName();
     }
 }
