@@ -37,6 +37,7 @@ public class AuthController {
             Auth.SignUp request
     ) {
         var result = this.memberService.register(request);
+        log.info("user signup -> " + request.getUsername());
         return ResponseEntity.ok(result);
     }
 
@@ -53,6 +54,7 @@ public class AuthController {
     ) {
         var member = this.memberService.authenticate(request);
         var token = this.tokenProvider.generateToken(member.getUsername(), member.getRoles());
+        log.info("user login -> " + request.getUsername());
         return ResponseEntity.ok(token);
     }
 }
